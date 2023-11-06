@@ -157,7 +157,6 @@ if (!class_exists('WCCartItemRewards')) {
         {
             echo '<div class="wrap wc-cart-item-reward-admin">';
             echo '<h1>All WC Cart Item Rewards</h1>';
-            echo "<div style='padding:1rem;'>";
 
             // Include the HTML content from the /views folder
             require_once(WCIR_VIEWS . "/reward-list.php");
