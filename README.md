@@ -45,10 +45,12 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 - Add WooCommerce plugin requirement.
 - Add product addtion and removal to carts
+- Only enqueue scripts and styles on plugin pages
 
   ### Error Handling
 
 - Handle errors when updating items with cron.
 - Handle errors when submitting the form to add a reward.
+  - End date should not be before start date
 - Handle errors when there are issues deleting rewards from the database.
 - Handle errors if there are form submission issues when editing.
