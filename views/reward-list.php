@@ -133,7 +133,7 @@ function wcir_display_table()
 
     $add_reward_url = admin_url('/admin.php?page=wc-cart-item-reward-add');
     $wcir_instance->prepare_items();
-    echo '<a href=' . $add_reward_url . ' class="page-title-action">Add New Reward</a>';
+    echo '<a href="' . $add_reward_url . '" class="page-title-action">Add New Reward</a>';
     $wcir_instance->display();
 }
 
