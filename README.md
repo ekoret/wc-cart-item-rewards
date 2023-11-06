@@ -44,7 +44,6 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 ## To-Do List
 
 - Add WooCommerce plugin requirement.
-- Add existing product into the product field when editing.
 - Add product addtion and removal to carts
 
   ### Error Handling

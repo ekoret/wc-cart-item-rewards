@@ -46,6 +46,15 @@
                 <td>
 
                     <select data-security="<?php echo wp_create_nonce('search-products'); ?>" style="width: 300px;" id="wcir_product_id_select">
+                        <?php if (isset($_GET['edit'])) : ?>
+                            <?php
+                            $product = wc_get_product($reward_item['product_id']);
+                            $product_name = $product->get_name();
+                            $product_sku = $product->get_sku();
+                            $product_text = $product_name . " (" . $product_sku . ")";
+                            ?>
+                            <option value="<?php echo $reward_item['product_id']; ?>"><?php echo $product_text; ?></option>
+                        <?php endif; ?>
                     </select>
 
                     <p class="description">The product that will be added to the customers order.</p>
