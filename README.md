@@ -38,6 +38,10 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 ## Future Plans
 
+- Add option to give rewards depending on amount of orders made
+  - This will allow for things such as "first orders receive X"
+- Add option to set discount on item
+  - Instead of only free rewards, assign discounts to product rewards
 - Add coupon support
   - If a coupon is added to the cart, attach a free gift
 
