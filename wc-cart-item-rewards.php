@@ -288,13 +288,13 @@ if (!class_exists('WCCartItemRewards')) {
                 $start_date = strtotime($row['start_date'] . ' 00:00:00');
                 $end_date = strtotime($row['end_date'] . ' 23:59:59');
 
-                if ($current_timestamp > $end_date) {
+                if ($row['status'] === 1 && !is_null($end_date) && $current_timestamp > $end_date) {
                     $wpdb->update(
                         $table,
                         array('status' => 0),
                         array('id' => $row['id'])
                     );
-                } else if ($current_timestamp > $start_date) {
+                } else if ($row['status'] === 0 && !is_null($start_date) && $current_timestamp > $start_date) {
 
                     $wpdb->update(
                         $table,
