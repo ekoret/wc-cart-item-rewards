@@ -49,7 +49,6 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 - Add WooCommerce plugin requirement.
 - Add product addtion and removal to carts
-- Only enqueue scripts and styles on plugin pages
 
   ### Error Handling
 

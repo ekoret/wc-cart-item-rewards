@@ -69,20 +69,22 @@ if (!class_exists('WCCartItemRewards')) {
 
         public function enqueue()
         {
-            // Plugin  styles
-            wp_enqueue_style('wcir-styles', WCIR_STYLES, array(), false, 'all');
+            if (is_admin() && isset($_GET['page']) && ($_GET['page'] === 'wc-cart-item-rewards' || $_GET['page'] === 'wc-cart-item-rewards-add')) {
+                // Plugin  styles
+                wp_enqueue_style('wcir-styles', WCIR_STYLES, array(), false, 'all');
 
-            // Product picker script
-            wp_register_script('wcir-woo-select-script', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.js', array('jquery'), null, true);
-            wp_enqueue_script('wcir-woo-select-script');
+                // Product picker script
+                wp_register_script('wcir-woo-select-script', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.js', array('jquery'), null, true);
+                wp_enqueue_script('wcir-woo-select-script');
 
-            // Product picker styles
-            wp_register_style('wcir-woo-select-style', WC()->plugin_url() . '/assets/css/select2.css', array(), false, 'all');
-            wp_enqueue_style('wcir-woo-select-style');
+                // Product picker styles
+                wp_register_style('wcir-woo-select-style', WC()->plugin_url() . '/assets/css/select2.css', array(), false, 'all');
+                wp_enqueue_style('wcir-woo-select-style');
 
-            // Product picker ajax script
-            wp_register_script('wcir-product-picker-script', WCIR_SCRIPTS . "/wcir_product_picker_ajax.js", array('jquery'));
-            wp_enqueue_script('wcir-product-picker-script');
+                // Product picker ajax script
+                wp_register_script('wcir-product-picker-script', WCIR_SCRIPTS . "/wcir_product_picker_ajax.js", array('jquery'));
+                wp_enqueue_script('wcir-product-picker-script');
+            }
         }
 
         public function activate()
