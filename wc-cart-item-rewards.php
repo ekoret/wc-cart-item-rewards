@@ -55,6 +55,10 @@ if (!class_exists('WCCartItemRewards')) {
             add_action('admin_menu', array($this, 'add_admin_menu_pages'));
 
             add_action('admin_enqueue_scripts', array($this, 'enqueue'));
+
+            // Hook to add reward
+            add_action('woocommerce_before_calculate_totals', array($this, 'maybe_add_reward_to_cart'), 100, 1);
+            add_action('woocommerce_before_calculate_totals', array($this, 'set_reward_prices'), 110, 1);
         }
 
         public function add_admin_menu_pages()
@@ -221,6 +225,129 @@ if (!class_exists('WCCartItemRewards')) {
         private function remove_reward_status_update_cron()
         {
             wp_clear_scheduled_hook(self::$cron_event_name);
+        }
+
+        public function maybe_add_reward_to_cart($cart)
+        {
+            $rewards = $this->get_all_active_rewards();
+
+            // Get the total of the cart with discounts
+            $cart_total_after_discounts = 0;
+            foreach ($cart->get_cart() as $cart_item) {
+                $cart_total_after_discounts += $cart_item['data']->get_price() * $cart_item['quantity'];
+            }
+
+            // Check all rewards if any are eligible for the cart
+            foreach ($rewards as $reward) {
+                $reward_id = $reward['id'];
+                $minimum_order = $reward['minimum_order'];
+
+                // Skip the reward if its already in the cart
+                if ($this->check_if_reward_in_cart($cart->get_cart(), $reward_id)) {
+                    // But before we do that, lets check if the order is still eligbile for the reward
+                    if ($this->check_minimum_order_total($minimum_order, $cart_total_after_discounts)) {
+                        continue;
+                    } else {
+                        $this->remove_reward_from_cart($cart, $reward_id);
+                    }
+                    continue;
+                }
+
+                $product_id = $reward['product_id'];
+                $product = wc_get_product($product_id);
+                $current_redemptions = $reward['current_redemptions'];
+                // $redemptions_per_user = $reward['redemptions_per_user'];
+                $stock = $reward['stock'];
+
+                // check that there is stock left
+                if (!$this->check_stock($current_redemptions, $stock, $product->get_stock_status())) {
+                    continue;
+                }
+
+                // checking the cart amount after discounts
+                if (!$this->check_minimum_order_total($minimum_order, $cart_total_after_discounts)) {
+                    continue;
+                }
+
+                // if we're here we can add the reward, we will add custom data to track it later
+                $cart_item_data = array(
+                    'wcir_reward' => 1,
+                    'wcir_reward_id' => $reward_id
+                );
+                $cart->add_to_cart($product_id, 1, 0, array(), $cart_item_data);
+            }
+        }
+
+        /**
+         * Set the reward prices to 0. This is called right after maybe_add_reward_to_cart
+         */
+        public function set_reward_prices($cart)
+        {
+            foreach ($cart->get_cart() as $cart_item) {
+                if (isset($cart_item['wcir_reward'])) {
+                    $cart_item['data']->set_price(0);
+                }
+            }
+        }
+
+        /**
+         * Check if there is stock left for the reward and the product itself.
+         */
+        public function check_stock($current_redemptions, $stock, $stock_status)
+        {
+            // if the product is out of stock, false
+            if ($stock_status === 'outofstock') {
+                return false;
+            }
+
+            // if stock redemption has supassed, false
+            if ($current_redemptions >= $stock) {
+                return false;
+            }
+
+
+            return true;
+        }
+
+        public function check_if_reward_in_cart($cart_items, $reward_id)
+        {
+            foreach ($cart_items as $cart_item) {
+                if (isset($cart_item['wcir_reward_id']) && $cart_item['wcir_reward_id'] == $reward_id) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public function check_minimum_order_total($minimum_order, $order_total)
+        {
+            if ($order_total >= $minimum_order) {
+                return true;
+            }
+
+            return false;
+        }
+
+        public function remove_reward_from_cart($cart, $reward_id)
+        {
+            foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+                if (isset($cart_item['wcir_reward_id']) && $cart_item['wcir_reward_id'] == $reward_id) {
+                    $cart->remove_cart_item($cart_item_key);
+                }
+            }
+        }
+
+
+        public function get_all_active_rewards()
+        {
+            global $wpdb;
+
+            $table = $wpdb->prefix . self::$rewards_table_name;
+
+            $rewards = $wpdb->get_results("SELECT * FROM $table WHERE status = 1", ARRAY_A);
+
+            return $rewards;
         }
 
         public static function add_new_reward($reward_data)
