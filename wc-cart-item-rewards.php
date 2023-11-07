@@ -6,7 +6,7 @@
  * Version:           0.0.1
  * Author:            ekoret
  *
- * @package wc-cart-item-reward
+ * @package wc-cart-item-rewards
  */
 
 if (!defined('ABSPATH')) die; // die if accessed directly
@@ -60,11 +60,11 @@ if (!class_exists('WCCartItemRewards')) {
         public function add_admin_menu_pages()
         {
             // Main reward list table page
-            add_menu_page("WC Cart Item Reward", "WC Cart Item Reward", "manage_options", "wc-cart-item-reward", array($this, 'all_rewards_page'));
-            add_submenu_page("wc-cart-item-reward", "All Cart Item Rewards", "All Rewards", "manage_options", "wc-cart-item-reward", array($this, 'all_rewards_page'));
+            add_menu_page("WC Cart Item Rewards", "WC Cart Item Rewards", "manage_options", "wc-cart-item-rewards", array($this, 'all_rewards_page'));
+            add_submenu_page("wc-cart-item-rewards", "All Cart Item Rewards", "All Rewards", "manage_options", "wc-cart-item-rewards", array($this, 'all_rewards_page'));
 
             // Add reward page
-            add_submenu_page("wc-cart-item-reward", "Add Cart Item Reward", "Add", "manage_options", "wc-cart-item-reward-add", array($this, 'add_edit_rewards_page'));
+            add_submenu_page("wc-cart-item-rewards", "Add Cart Item Reward", "Add", "manage_options", "wc-cart-item-rewards-add", array($this, 'add_edit_rewards_page'));
         }
 
         public function enqueue()
@@ -155,7 +155,7 @@ if (!class_exists('WCCartItemRewards')) {
 
         public function all_rewards_page()
         {
-            echo '<div class="wrap wc-cart-item-reward-admin">';
+            echo '<div class="wrap wc-cart-item-rewards-admin">';
             echo '<h1>All WC Cart Item Rewards</h1>';
 
             // Include the HTML content from the /views folder
@@ -166,7 +166,7 @@ if (!class_exists('WCCartItemRewards')) {
 
         public function add_edit_rewards_page()
         {
-            echo '<div class="wrap wc-cart-item-reward-admin">';
+            echo '<div class="wrap wc-cart-item-rewards-admin">';
 
             $page_title = "<h1>Add WC Cart Item Reward</h1>";
 

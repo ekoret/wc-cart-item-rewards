@@ -13,7 +13,7 @@ function wcir_process_add_reward_form()
 
             // if deletion was successful, return user to all rewards page
             if ($delete_result) {
-                wp_safe_redirect(admin_url('/admin.php?page=wc-cart-item-reward'));
+                wp_safe_redirect(admin_url('/admin.php?page=wc-cart-item-rewards'));
                 exit;
             }
         }
@@ -55,9 +55,17 @@ function wcir_process_add_reward_form()
 
             if ($result) {
                 // if reward was added successfully, land on edit page with reward
-                wp_safe_redirect(admin_url("/admin.php?page=wc-cart-item-reward"));
+                wp_safe_redirect(admin_url("/admin.php?page=wc-cart-item-rewards"));
                 exit;
             }
         }
     }
+}
+
+
+function _pp($data)
+{
+    echo "<pre>";
+    print_r($data);
+    echo "</pre>";
 }

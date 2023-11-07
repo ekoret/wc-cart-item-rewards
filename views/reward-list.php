@@ -103,7 +103,7 @@ class WCCartItemRewardsTable extends WP_List_Table
                 return $item[$column_name];
 
             case 'reward_name':
-                return "<a href='" . admin_url("/admin.php?page=wc-cart-item-reward-add&edit&reward_id=" . $item['id'] . "") . "'>" . $item[$column_name] . "</a>";
+                return "<a href='" . admin_url("/admin.php?page=wc-cart-item-rewards-add&edit&reward_id=" . $item['id'] . "") . "'>" . $item[$column_name] . "</a>";
 
             case 'current_redemptions':
                 return $item[$column_name] . "/" . (!empty($item['stock']) ? $item['stock'] : '&infin;');
@@ -131,7 +131,7 @@ function wcir_display_table()
 {
     $wcir_instance = new WCCartItemRewardsTable();
 
-    $add_reward_url = admin_url('/admin.php?page=wc-cart-item-reward-add');
+    $add_reward_url = admin_url('/admin.php?page=wc-cart-item-rewards-add');
     $wcir_instance->prepare_items();
     echo '<a href="' . $add_reward_url . '" class="page-title-action">Add New Reward</a>';
     $wcir_instance->display();

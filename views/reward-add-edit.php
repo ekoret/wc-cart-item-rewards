@@ -1,5 +1,5 @@
 <div style="display:flex;">
-    <a href="<?php echo admin_url('/admin.php?page=wc-cart-item-reward'); ?>" class="page-title-action">Cancel</a>
+    <a href="<?php echo admin_url('/admin.php?page=wc-cart-item-rewards'); ?>" class="page-title-action">Cancel</a>
     <?php if (isset($_GET['edit'])) : ?>
         <form style="margin-left:10px;" method="post" action="">
             <input type="submit" name="wcir_delete_submit" id="wcir_delete_submit" class="page-title-action" value="Delete">
