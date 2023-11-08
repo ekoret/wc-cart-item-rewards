@@ -1,19 +1,49 @@
 
 <?php
 
-class WCIRRewards
+class WCIRRewardsManager
 {
+    private $WCIRPlugin;
+
+    public function __construct($WCIRPlugin)
+    {
+        $this->WCIRPlugin = $WCIRPlugin;
+    }
+
     /**
      * Display list of all the rewards.
      */
     public function display_rewards_page()
     {
-        echo '<div class="wrap wc-cart-item-rewards-admin">';
-        echo '<h1>All WC Cart Item Rewards</h1>';
+        $wcir_table_instance = new WCIRRewardsTable($this->WCIRPlugin->rewards_table_name);
 
         require_once(WCIR_VIEWS . "/reward-list.php");
+    }
 
-        echo '</div>';
+    /**
+     * Display the add and edit rewards page.
+     */
+    public function display_rewards_editor_page()
+    {
+
+        $page_title = "<h1>Add WC Cart Item Reward</h1>";
+
+        if (isset($_GET) && isset($_GET['edit'])) {
+            global $wpdb;
+
+            $reward_table = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
+
+            $wcir_reward_id = intval($_GET['reward_id']);
+
+            $prepared_query = $wpdb->prepare("SELECT * FROM $reward_table
+                                           WHERE id = %d", array($wcir_reward_id));
+
+            $reward_item = $wpdb->get_row($prepared_query, ARRAY_A);
+
+            $page_title = "<h1>Edit WC Cart Item Reward (#" . $wcir_reward_id . ")</h1>";
+        }
+
+        require_once(WCIR_VIEWS . "/reward-editor.php");
     }
 
     public function maybe_add_reward_to_cart($cart)
@@ -32,9 +62,9 @@ class WCIRRewards
             $minimum_order = $reward['minimum_order'];
 
             // Check if reward is already in the cart
-            if ($this->check_if_reward_in_cart($cart->get_cart(), $reward_id)) {
+            if ($this->is_reward_in_cart($cart->get_cart(), $reward_id)) {
                 // Check if the order is still eligbile for the reward
-                if ($this->check_minimum_order_total($minimum_order, $cart_total_after_discounts)) {
+                if ($this->is_cart_over_minimum($minimum_order, $cart_total_after_discounts)) {
                     continue;
                 } else {
                     $this->remove_reward_from_cart($cart, $reward_id);
@@ -53,7 +83,7 @@ class WCIRRewards
             }
 
             // Check if the cart total is eligible 
-            if (!$this->check_minimum_order_total($minimum_order, $cart_total_after_discounts)) {
+            if (!$this->is_cart_over_minimum($minimum_order, $cart_total_after_discounts)) {
                 continue;
             }
 
@@ -99,7 +129,10 @@ class WCIRRewards
         return true;
     }
 
-    public function check_if_reward_in_cart($cart_items, $reward_id)
+    /**
+     * Finds if a reward is already in the cart.
+     */
+    public function is_reward_in_cart($cart_items, $reward_id)
     {
         foreach ($cart_items as $cart_item) {
             if (isset($cart_item['wcir_reward_id']) && $cart_item['wcir_reward_id'] == $reward_id) {
@@ -110,15 +143,21 @@ class WCIRRewards
         return false;
     }
 
-    public function check_minimum_order_total($minimum_order, $order_total)
+    /**
+     * Checks if carts total is eligible for a reward.
+     */
+    public function is_cart_over_minimum($minimum_order, $cart_total)
     {
-        if ($order_total >= $minimum_order) {
+        if ($cart_total >= $minimum_order) {
             return true;
         }
 
         return false;
     }
 
+    /***
+     * Remove a reward from cart.
+     */
     public function remove_reward_from_cart($cart, $reward_id)
     {
         foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
@@ -129,21 +168,27 @@ class WCIRRewards
     }
 
 
+    /**
+     * Get all active rewards.
+     */
     public function get_all_active_rewards()
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
+        $table = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
 
         $rewards = $wpdb->get_results("SELECT * FROM $table WHERE status = 1", ARRAY_A);
 
         return $rewards;
     }
 
-    public static function add_new_reward($reward_data)
+    /**
+     * Add a new reward.
+     */
+    public function add_new_reward($reward_data)
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
+        $table_name = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
 
         $result = $wpdb->insert($table_name, $reward_data);
 
@@ -157,10 +202,13 @@ class WCIRRewards
         }
     }
 
-    public static function update_reward($reward_data)
+    /**
+     * Update a reward.
+     */
+    public function update_reward($reward_data)
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
+        $table_name = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
 
 
         $where = array('id' => $reward_data['id']);
@@ -176,10 +224,13 @@ class WCIRRewards
         }
     }
 
-    public static function delete_reward($reward_id)
+    /**
+     * Deletes a reward.
+     */
+    public function delete_reward($reward_id)
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
+        $table_name = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
 
         $result = $wpdb->delete($table_name, array('id' => $reward_id));
 
@@ -193,11 +244,14 @@ class WCIRRewards
         }
     }
 
-    public static function update_status_based_on_dates()
+    /**
+     * The cron method to run to update statues depending on start and end dates.
+     */
+    public function update_status_based_on_dates()
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
+        $table = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
         $current_date = current_time('mysql');
         $current_timestamp = strtotime($current_date);
 
@@ -220,6 +274,70 @@ class WCIRRewards
                     array('status' => 1),
                     array('id' => $row['id'])
                 );
+            }
+        }
+    }
+
+    /**
+     * Handle the add/edit/delete form to add/edit/delete reward.
+     */
+    public function process_editor_form()
+    {
+        if (isset($_POST) && isset($_POST['wcir_delete_submit']) || isset($_POST['wcir_add_submit'])) {
+
+            // handling deletion of reward
+            if (isset($_POST['wcir_delete_submit'])) {
+                $reward_id = intval($_GET['reward_id']);
+
+                $delete_result = $this->delete_reward($reward_id);
+
+                // if deletion was successful, return user to all rewards page
+                if ($delete_result) {
+                    wp_safe_redirect(admin_url('/admin.php?page=wc-cart-item-rewards'));
+                    exit;
+                }
+            }
+
+            // handling adding of reward
+            if (isset($_POST['wcir_add_submit'])) {
+                $status = isset($_POST['wcir_status']) ? 1 : 0;
+                $reward_name = sanitize_text_field($_POST['wcir_reward_name']);
+                $display_name = sanitize_text_field($_POST['wcir_display_name']);
+                $product_id = intval($_POST['wcir_product_id']);
+                $minimum_order = empty($_POST['wcir_minimum_order']) ? null : floatval($_POST['wcir_minimum_order']);
+                $stock = empty($_POST['wcir_stock']) ? null : intval($_POST['wcir_stock']);
+                $current_redemptions = empty($_POST['wcir_current_redemptions']) ? 0 : intval($_POST['wcir_current_redemptions']);
+                $redemptions_per_user = empty($_POST['wcir_redemptions_per_user']) ? null : intval($_POST['wcir_redemptions_per_user']);
+                $start_date = empty($_POST['wcir_start_date']) ? null : date('Y-m-d', strtotime($_POST['wcir_start_date']));
+                $end_date = empty($_POST['wcir_end_date']) ? null : date('Y-m-d', strtotime($_POST['wcir_end_date']));
+
+                $reward_data = array(
+                    'status' => $status,
+                    'reward_name' => $reward_name,
+                    'display_name' => $display_name,
+                    'product_id' => $product_id,
+                    'minimum_order' => $minimum_order,
+                    'stock' => $stock,
+                    'current_redemptions' => $current_redemptions,
+                    'redemptions_per_user' => $redemptions_per_user,
+                    'start_date' => $start_date,
+                    'end_date' => $end_date,
+                );
+
+                if (isset($_GET['edit'])) {
+                    $reward_id = intval($_GET['reward_id']);
+                    $reward_data['id'] = $reward_id;
+
+                    $result = $this->update_reward($reward_data);
+                } else {
+                    $result = $this->add_new_reward($reward_data);
+                }
+
+                if ($result) {
+                    // if reward was added successfully, land on edit page with reward
+                    wp_safe_redirect(admin_url("/admin.php?page=wc-cart-item-rewards"));
+                    exit;
+                }
             }
         }
     }

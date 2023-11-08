@@ -22,17 +22,21 @@ if (!class_exists('WCIRPlugin')) {
     class WCIRPlugin
     {
 
-        public static $rewards_table_name = "wcir_cart_item_rewards";
-        public static $cron_event_name = "wcir_reward_status_update";
+        public $rewards_table_name = "wcir_cart_item_rewards";
+        public $cron_event_name = "wcir_reward_status_update";
+        public $manager;
+        public $rewards_table_instance;
 
 
         public function __construct()
         {
-            $this->register();
-
-            require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards.php');
-            require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards-add-edit.php');
+            require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards-manager.php');
+            require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards-table.php');
             require_once(plugin_dir_path(__FILE__) . 'inc/wcir-functions.php');
+
+
+            $this->manager = new WCIRRewardsManager($this);
+            $this->register();
         }
 
 
@@ -41,35 +45,44 @@ if (!class_exists('WCIRPlugin')) {
          */
         private function register()
         {
+
             register_activation_hook(__FILE__, array($this, 'activate'));
             register_deactivation_hook(__FILE__, array($this, 'deactivate'));
-
-            // Register cron hook
-            add_action(self::$cron_event_name, array('WCIRRewawrds', 'update_status_based_on_dates'));
 
             add_action('admin_menu', array($this, 'add_admin_menu_pages'));
 
             add_action('admin_enqueue_scripts', array($this, 'enqueue'));
 
+            // Register cron hook
+            add_action($this->cron_event_name, array($this->manager, 'update_status_based_on_dates'));
+
             // Hook to add reward
-            add_action('woocommerce_before_calculate_totals', array('WCIRRewards', 'maybe_add_reward_to_cart'), 100, 1);
-            add_action('woocommerce_before_calculate_totals', array('WCIRRewards', 'set_reward_prices'), 110, 1);
+            add_action('woocommerce_before_calculate_totals', array($this->manager, 'maybe_add_reward_to_cart'), 100, 1);
+            add_action('woocommerce_before_calculate_totals', array($this->manager, 'set_reward_prices'), 110, 1);
+
+            add_action('init', array($this->manager, 'process_editor_form'));
         }
 
+        /**
+         * Adding the admin menu pages and submenus
+         */
         public function add_admin_menu_pages()
         {
             // Main reward list table page
-            add_menu_page("WC Cart Item Rewards", "WC Cart Item Rewards", "manage_options", "wc-cart-item-rewards", array('WCIRRewards', 'display_rewards_page'));
-            add_submenu_page("wc-cart-item-rewards", "All Cart Item Rewards", "All Rewards", "manage_options", "wc-cart-item-rewards", array('WCIRRewards', 'display_rewards_page'));
+            add_menu_page("WC Cart Item Rewards", "WC Cart Item Rewards", "manage_options", "wc-cart-item-rewards", array($this->manager, 'display_rewards_page'));
+            add_submenu_page("wc-cart-item-rewards", "All Cart Item Rewards", "All Rewards", "manage_options", "wc-cart-item-rewards", array($this->manager, 'display_rewards_page'));
 
             // Add/edit reward page
-            add_submenu_page("wc-cart-item-rewards", "Add Cart Item Reward", "Add", "manage_options", "wc-cart-item-rewards-add", array('WCIRRewardsAddEdit', 'display_add_edit_rewards_page'));
+            add_submenu_page("wc-cart-item-rewards", "Add Cart Item Reward", "Add", "manage_options", "wc-cart-item-rewards-editor", array($this->manager, 'display_rewards_editor_page'));
         }
 
+        /**
+         * Enqueue plugins styles and scripts
+         */
         public function enqueue()
         {
-            if (is_admin() && isset($_GET['page']) && ($_GET['page'] === 'wc-cart-item-rewards' || $_GET['page'] === 'wc-cart-item-rewards-add')) {
-                // Plugin  styles
+            if (is_admin() && isset($_GET['page']) && ($_GET['page'] === 'wc-cart-item-rewards' || $_GET['page'] === 'wc-cart-item-rewards-editor')) {
+                // Plugin styles
                 wp_enqueue_style('wcir-styles', WCIR_STYLES, array(), false, 'all');
 
                 // Product picker script
@@ -118,7 +131,7 @@ if (!class_exists('WCIRPlugin')) {
         {
             global $wpdb;
 
-            $table_name = $wpdb->prefix . self::$rewards_table_name;
+            $table_name = $wpdb->prefix . $this->rewards_table_name;
 
             $charset_collate = $wpdb->get_charset_collate();
 
@@ -148,7 +161,7 @@ if (!class_exists('WCIRPlugin')) {
         private function delete_db()
         {
             global $wpdb;
-            $table_name = $wpdb->prefix . self::$rewards_table_name;
+            $table_name = $wpdb->prefix . $this->rewards_table_name;
 
             // Check if the table exists
             if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
@@ -162,11 +175,11 @@ if (!class_exists('WCIRPlugin')) {
          */
         private function schedule_reward_status_update_cron()
         {
-            if (!wp_next_scheduled(self::$cron_event_name)) {
+            if (!wp_next_scheduled($this->cron_event_name)) {
 
                 $timestamp = current_datetime()->modify('tomorrow midnight')->getTimestamp();
 
-                wp_schedule_event($timestamp, 'daily', self::$cron_event_name);
+                wp_schedule_event($timestamp, 'daily', $this->cron_event_name);
             }
         }
 
@@ -175,14 +188,14 @@ if (!class_exists('WCIRPlugin')) {
          */
         private function remove_reward_status_update_cron()
         {
-            wp_clear_scheduled_hook(self::$cron_event_name);
+            wp_clear_scheduled_hook($this->cron_event_name);
         }
     }
 }
 
 function init_wcir_plugin()
 {
-    new WCIRPlugin();
+    return new WCIRPlugin();
 }
 
 init_wcir_plugin();
