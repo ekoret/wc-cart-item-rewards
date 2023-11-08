@@ -76,9 +76,10 @@ class WCIRRewardsManager
             $product = wc_get_product($product_id);
             $current_redemptions = $reward['current_redemptions'];
             $stock = $reward['stock'];
+            $stock_status = $product->get_stock_status();
 
             // Check if there is any stock or redemptions available
-            if (!$this->check_stock($current_redemptions, $stock, $product->get_stock_status())) {
+            if (!$this->check_stock($current_redemptions, $stock, $stock_status)) {
                 continue;
             }
 
