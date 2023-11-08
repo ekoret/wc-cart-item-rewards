@@ -48,6 +48,7 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 ## To-Do List
 
 - REFACTOR
+- Create logs
 - Add WooCommerce plugin requirement.
 
   ### Error Handling
