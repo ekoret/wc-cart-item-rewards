@@ -57,8 +57,8 @@ if (!class_exists('WCIRPlugin')) {
             add_action($this->cron_event_name, array($this->manager, 'update_status_based_on_dates'));
 
             // Hook to add reward
+            add_action('woocommerce_before_calculate_totals', array($this->manager, 'set_reward_prices'), 100, 1);
             add_action('woocommerce_before_calculate_totals', array($this->manager, 'maybe_add_reward_to_cart'), 100, 1);
-            add_action('woocommerce_before_calculate_totals', array($this->manager, 'set_reward_prices'), 110, 1);
 
             add_action('init', array($this->manager, 'process_editor_form'));
         }
