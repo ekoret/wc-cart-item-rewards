@@ -30,7 +30,7 @@ class WCCartItemRewardsTable extends WP_List_Table
     {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . WCCartItemRewards::$rewards_table_name;
+        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
         // By default sort by change date in descending order
         $orderby = !isset($_GET['orderby']) || empty($_GET['orderby']) ? "change_date" : trim($_GET['orderby']);
