@@ -47,6 +47,9 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 ## To-Do List
 
+- When order gets into processing/completed, increment redemption counter for reward
+  - Either increment when it gets added to cart, in processing, or completed
+  - Decrement when removed from cart, processing, or completed
 - REFACTOR
 - Create logs
 - Add WooCommerce plugin requirement.
