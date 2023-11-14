@@ -47,12 +47,21 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 ## To-Do List
 
-- When order gets into processing/completed, increment redemption counter for reward
-  - Either increment when it gets added to cart, in processing, or completed
-  - Decrement when removed from cart, processing, or completed
+- Change name of reward in cart to set display name
 - REFACTOR
 - Create logs
-- Add WooCommerce plugin requirement.
+- Add WooCommerce plugin requirement
+
+  ### Handling Reward Stock
+
+- Decrease stock when order gets placed
+- When adding reward to cart, add cart item data for timestamp
+- Make a function that checks on page load or periodically check cart items
+  - Think about case where customer has reward in cart, but doesn't come back to site for a long time
+- If cart item is a reward and it has a timestamp, check the current timestamp with cart item timestamp
+- Add "place order by" setting for reward
+  - Create timers in mini-cart/cart/checkout pages to show place by
+- Error messages for if reward is out of stock
 
   ### Error Handling
 
