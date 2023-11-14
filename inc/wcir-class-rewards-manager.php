@@ -342,4 +342,41 @@ class WCIRRewardsManager
             }
         }
     }
+
+    /**
+     * Disbles the quantity fields on cart and checkout
+     */
+    public function disable_cart_item_qty($quantity_html, $cart_item_key, $cart_item)
+    {
+        if (isset($cart_item['wcir_reward'])) {
+            return '<span style="font-size:0.85rem;">FREE</span>';
+        }
+        return $quantity_html;
+    }
+
+    /**
+     * Returns the display name of the reward
+     */
+    private function get_reward_display_name($reward_id)
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
+
+        $reward = $wpdb->get_var($wpdb->prepare("SELECT display_name FROM $table WHERE id = %d", array($reward_id)));
+
+        return $reward;
+    }
+
+    /**
+     * Change the cart item name to the reward display name
+     */
+    public function change_reward_display_name($product_name, $cart_item, $cart_item_key)
+    {
+        if (isset($cart_item['wcir_reward'])) {
+            $product_name = $this->get_reward_display_name($cart_item['wcir_reward_id']);
+        }
+
+        return $product_name;
+    }
 }

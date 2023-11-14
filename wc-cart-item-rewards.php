@@ -57,8 +57,15 @@ if (!class_exists('WCIRPlugin')) {
             add_action($this->cron_event_name, array($this->manager, 'update_status_based_on_dates'));
 
             // Hook to add reward
-            add_action('woocommerce_before_calculate_totals', array($this->manager, 'set_reward_prices'), 100, 1);
-            add_action('woocommerce_before_calculate_totals', array($this->manager, 'maybe_add_reward_to_cart'), 100, 1);
+            add_action('woocommerce_before_calculate_totals', array($this->manager, 'set_reward_prices'), 10, 1);
+            add_action('woocommerce_before_calculate_totals', array($this->manager, 'maybe_add_reward_to_cart'), 10, 1);
+
+            // Hooks to handle reward cart item quantity
+            add_filter('woocommerce_cart_item_quantity', array($this->manager, 'disable_cart_item_qty'), 10, 3);
+            add_filter('woocommerce_widget_cart_item_quantity', array($this->manager, 'disable_cart_item_qty'), 10, 3);
+
+            // Hook to change reward display name
+            add_filter('woocommerce_cart_item_name', array($this->manager, 'change_reward_display_name'), 10, 3);
 
             add_action('init', array($this->manager, 'process_editor_form'));
         }
