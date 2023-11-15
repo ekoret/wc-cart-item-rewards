@@ -376,7 +376,11 @@ class WCIRRewardsManager
     public function change_reward_display_name($product_name, $cart_item, $cart_item_key)
     {
         if (isset($cart_item['wcir_reward'])) {
+            $permalink = $cart_item['data']->get_permalink();
+
             $product_name = $this->get_reward_display_name($cart_item['wcir_reward_id']);
+
+            $product_name = "<a href='" . $permalink . "'>" . $product_name . "</a>";
         }
 
         return $product_name;
