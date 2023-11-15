@@ -12,20 +12,20 @@
 if (!defined('ABSPATH')) die; // die if accessed directly
 
 
+define('WCIR_BASENAME', plugin_basename(__FILE__));
 define('WCIR_STYLES', plugins_url('/assets/css/style.css', __FILE__));
 define('WCIR_SCRIPTS', plugins_url('/assets/js', __FILE__));
 define('WCIR_VIEWS', plugin_dir_path(__FILE__) . 'views');
-
 
 if (!class_exists('WCIRPlugin')) {
 
     class WCIRPlugin
     {
 
-        public $rewards_table_name = "wcir_cart_item_rewards";
-        public $cron_event_name = "wcir_reward_status_update";
+        protected static $instance;
+        public static $rewards_table_name = "wcir_cart_item_rewards";
+        public static $cron_event_name = "wcir_reward_status_update";
         public $manager;
-        public $rewards_table_instance;
 
 
         public function __construct()
@@ -39,22 +39,26 @@ if (!class_exists('WCIRPlugin')) {
             $this->register();
         }
 
+        public static function init()
+        {
+            if (is_null(self::$instance)) {
+                self::$instance = new self;
+            }
+
+            return self::$instance;
+        }
 
         /**
          * Register hooks
          */
         private function register()
         {
-
-            register_activation_hook(__FILE__, array($this, 'activate'));
-            register_deactivation_hook(__FILE__, array($this, 'deactivate'));
-
             add_action('admin_menu', array($this, 'add_admin_menu_pages'));
 
             add_action('admin_enqueue_scripts', array($this, 'enqueue'));
 
             // Register cron hook
-            add_action($this->cron_event_name, array($this->manager, 'update_status_based_on_dates'));
+            add_action(self::$cron_event_name, array($this->manager, 'update_status_based_on_dates'));
 
             // Hook to add reward
             add_action('woocommerce_before_calculate_totals', array($this->manager, 'set_reward_prices'), 10, 1);
@@ -119,11 +123,16 @@ if (!class_exists('WCIRPlugin')) {
          * 
          * Maybe creates tables and schedules the cron job.
          */
-        public function activate()
+        public static function activate()
         {
-            $this->maybe_create_reward_table();
+            if (!class_exists('WooCommerce')) {
+                deactivate_plugins(WCIR_BASENAME);
+                wp_die('Sorry, but this plugin requires the WooCommerce Plugin to be installed and active.');
+            }
 
-            $this->schedule_reward_status_update_cron();
+            self::maybe_create_reward_table();
+
+            self::schedule_reward_status_update_cron();
         }
 
         /**
@@ -132,21 +141,21 @@ if (!class_exists('WCIRPlugin')) {
          * Deletes tables and scheduled cron job.
          * TODO: Remove delete db and move into plugin delete hook.
          */
-        public function deactivate()
+        public static function deactivate()
         {
-            $this->delete_db(); // for development
+            self::delete_db(); // for development
 
-            $this->remove_reward_status_update_cron();
+            self::remove_reward_status_update_cron();
         }
 
         /**
          * Maybe create the reward table.
          */
-        private function maybe_create_reward_table()
+        public static function maybe_create_reward_table()
         {
             global $wpdb;
 
-            $table_name = $wpdb->prefix . $this->rewards_table_name;
+            $table_name = $wpdb->prefix . self::$rewards_table_name;
 
             $charset_collate = $wpdb->get_charset_collate();
 
@@ -174,10 +183,10 @@ if (!class_exists('WCIRPlugin')) {
         /**
          * Deletes all resources and tables.
          */
-        private function delete_db()
+        public static function delete_db()
         {
             global $wpdb;
-            $table_name = $wpdb->prefix . $this->rewards_table_name;
+            $table_name = $wpdb->prefix . self::$rewards_table_name;
 
             // Check if the table exists
             if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
@@ -189,29 +198,27 @@ if (!class_exists('WCIRPlugin')) {
         /**
          * Creates a cron job to run next at 12am based on the sites timezone, then daily.
          */
-        private function schedule_reward_status_update_cron()
+        public static function schedule_reward_status_update_cron()
         {
-            if (!wp_next_scheduled($this->cron_event_name)) {
+            if (!wp_next_scheduled(self::$cron_event_name)) {
 
                 $timestamp = current_datetime()->modify('tomorrow midnight')->getTimestamp();
 
-                wp_schedule_event($timestamp, 'daily', $this->cron_event_name);
+                wp_schedule_event($timestamp, 'daily', self::$cron_event_name);
             }
         }
 
         /**
          * Removes the scheduled cron job.
          */
-        private function remove_reward_status_update_cron()
+        public static function remove_reward_status_update_cron()
         {
-            wp_clear_scheduled_hook($this->cron_event_name);
+            wp_clear_scheduled_hook(self::$cron_event_name);
         }
     }
 }
 
-function init_wcir_plugin()
-{
-    return new WCIRPlugin();
-}
 
-init_wcir_plugin();
+register_activation_hook(__FILE__, array('WCIRPlugin', 'activate'));
+register_deactivation_hook(__FILE__, array('WCIRPlugin', 'deactivate'));
+add_action('plugins_loaded', array('WCIRPlugin', 'init'));
