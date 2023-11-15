@@ -127,7 +127,7 @@ if (!class_exists('WCIRPlugin')) {
         {
             if (!class_exists('WooCommerce')) {
                 deactivate_plugins(WCIR_BASENAME);
-                wp_die('Sorry, but this plugin requires the WooCommerce Plugin to be installed and active.');
+                wp_die('Sorry, but this WC Cart Item Rewards requires WooCommerce to be installed and active.', 'Error', array('back_link' => true));
             }
 
             self::maybe_create_reward_table();
