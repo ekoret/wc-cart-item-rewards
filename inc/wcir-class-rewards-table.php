@@ -87,6 +87,7 @@ class WCIRRewardsTable extends WP_List_Table
     {
         $columns = array(
             'reward_name' => '<span title="The reward name.">Reward Name</span>',
+            'display_name' => '<span title="The reward display name.">Display Name</span>',
             'status' => '<span title="If the reward is enabled or disabled.">Status</span>',
             'product_id' => '<span title="Product used for the reward.">Reward Item</span>',
             'current_redemptions' => '<span title="The current stock of redemptions for this reward.">Redemptions</span>',
@@ -105,6 +106,7 @@ class WCIRRewardsTable extends WP_List_Table
     protected function column_default($item, $column_name)
     {
         switch ($column_name) {
+            case 'display_name':
             case 'minimum_order':
             case 'stock':
             case 'start_date':

@@ -47,7 +47,6 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 ## To-Do List
 
-- Add display name column in rewards table
 - REFACTOR
 - Create logs
 - Add WooCommerce plugin requirement
