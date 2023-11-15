@@ -391,4 +391,18 @@ class WCIRRewardsManager
 
         return $item_data;
     }
+
+    /**
+     * Change the price of the reward in the mini-cart
+     * 
+     * Hooked into 'woocommerce_cart_item_product'
+     */
+    public function set_reward_prices_mini_cart($cart_item_data, $cart_item, $cart_item_key)
+    {
+        if (isset($cart_item['wcir_reward'])) {
+            $cart_item_data->set_price(0);
+        }
+
+        return $cart_item_data;
+    }
 }
