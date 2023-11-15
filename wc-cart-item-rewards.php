@@ -67,6 +67,9 @@ if (!class_exists('WCIRPlugin')) {
             // Hook to change reward display name
             add_filter('woocommerce_cart_item_name', array($this->manager, 'change_reward_display_name'), 10, 3);
 
+            // Hook to add item data to be displayed 
+            add_filter('woocommerce_get_item_data', array($this->manager, 'add_item_data'), 10, 2);
+
             add_action('init', array($this->manager, 'process_editor_form'));
         }
 

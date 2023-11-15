@@ -48,6 +48,7 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 ## To-Do List
 
 - Fix issue where refreshing page will set reward price visually back to regular price until adding another product
+- Add column and input for promotion name to display as item data
 - Add display name column in rewards table
 - REFACTOR
 - Create logs

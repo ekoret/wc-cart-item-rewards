@@ -349,7 +349,7 @@ class WCIRRewardsManager
     public function disable_cart_item_qty($quantity_html, $cart_item_key, $cart_item)
     {
         if (isset($cart_item['wcir_reward'])) {
-            return '<span style="font-size:0.85rem;">FREE</span>';
+            return '<span style="font-size:0.85rem;">1</span>';
         }
         return $quantity_html;
     }
@@ -378,5 +378,17 @@ class WCIRRewardsManager
         }
 
         return $product_name;
+    }
+
+    public function add_item_data($item_data, $cart_item)
+    {
+        if (isset($cart_item['wcir_reward'])) {
+            $item_data[] = array(
+                "key" => 'Promo',
+                "value" => 'Black Friday'
+            );
+        }
+
+        return $item_data;
     }
 }
