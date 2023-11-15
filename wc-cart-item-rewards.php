@@ -155,6 +155,7 @@ if (!class_exists('WCIRPlugin')) {
                 reward_name             VARCHAR(255)    NOT NULL,
                 display_name            VARCHAR(255)    NOT NULL,
                 product_id              INT(15)        NOT NULL,
+                inline_cart_display     VARCHAR(255),
                 status                  TINYINT(1)      NOT NULL DEFAULT 0,
                 current_redemptions     INT(8)          NOT NULL DEFAULT 0,
                 redemptions_per_user    INT(8),

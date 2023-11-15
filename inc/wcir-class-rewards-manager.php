@@ -304,6 +304,7 @@ class WCIRRewardsManager
                 $status = isset($_POST['wcir_status']) ? 1 : 0;
                 $reward_name = sanitize_text_field($_POST['wcir_reward_name']);
                 $display_name = sanitize_text_field($_POST['wcir_display_name']);
+                $inline_cart_display = sanitize_text_field($_POST['wcir_inline_cart_display']);
                 $product_id = intval($_POST['wcir_product_id']);
                 $minimum_order = empty($_POST['wcir_minimum_order']) ? null : floatval($_POST['wcir_minimum_order']);
                 $stock = empty($_POST['wcir_stock']) ? null : intval($_POST['wcir_stock']);
@@ -316,6 +317,7 @@ class WCIRRewardsManager
                     'status' => $status,
                     'reward_name' => $reward_name,
                     'display_name' => $display_name,
+                    'inline_cart_display' => $inline_cart_display,
                     'product_id' => $product_id,
                     'minimum_order' => $minimum_order,
                     'stock' => $stock,
@@ -380,16 +382,38 @@ class WCIRRewardsManager
         return $product_name;
     }
 
+    /**
+     * Adds an item data to be displayed in mini-cart, cart, checkout, order details
+     * 
+     * Hooked into 'woocommerce_get_item_data'
+     */
     public function add_item_data($item_data, $cart_item)
     {
         if (isset($cart_item['wcir_reward'])) {
-            $item_data[] = array(
-                "key" => 'Promo',
-                "value" => 'Black Friday'
-            );
+            $reward_id = $cart_item['wcir_reward_id'];
+
+            $reward_inline_cart_display = $this->get_inline_cart_display($reward_id);
+
+            if (!is_null($reward_inline_cart_display)) {
+                $item_data[] = array(
+                    "key" => 'Promo',
+                    "value" => $reward_inline_cart_display
+                );
+            }
         }
 
         return $item_data;
+    }
+
+    private function get_inline_cart_display($reward_id)
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . $this->WCIRPlugin->rewards_table_name;
+
+        $reward = $wpdb->get_var($wpdb->prepare("SELECT inline_cart_display FROM $table WHERE id = %d", array($reward_id)));
+
+        return $reward;
     }
 
     /**

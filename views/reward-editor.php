@@ -43,6 +43,15 @@
                 </tr>
                 <tr>
                     <th>
+                        <label for="wcir_inline_cart_display">Inline Cart Display Name</label>
+                    </th>
+                    <td>
+                        <input id="wcir_inline_cart_display" required name="wcir_inline_cart_display" class="regular-text" type="text" value="<?php echo isset($reward_item['inline_cart_display']) ? esc_attr($reward_item['inline_cart_display']) : ''; ?>">
+                        <p class="description">The name that will show under the products name in mini-cart, cart, checkout, order details, and packing slips.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
                         <label for="wcir_product_id">Product</label>
                     </th>
                     <td>
