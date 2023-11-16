@@ -14,6 +14,16 @@ class WCIRRewardsManager
     }
 
     /**
+     * Display list of all the rewards.
+     */
+    public function display_rewards_log_page()
+    {
+        $wcir_table_instance = new WCIRRewardsLogTable(WCIRPlugin::$rewards_logger_table_name);
+
+        require_once(WCIR_VIEWS . "/reward-log.php");
+    }
+
+    /**
      * Display the add and edit rewards page.
      */
     public function display_rewards_editor_page()

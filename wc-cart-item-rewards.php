@@ -24,13 +24,16 @@ if (!class_exists('WCIRPlugin')) {
 
         protected static $instance;
         public static $rewards_table_name = "wcir_cart_item_rewards";
+        public static $rewards_logger_table_name = "wcir_cart_item_rewards_log";
         public static $cron_event_name = "wcir_reward_status_update";
         public $manager;
 
 
         public function __construct()
         {
+            require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards-logger.php');
             require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards-manager.php');
+            require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards-log-table.php');
             require_once(plugin_dir_path(__FILE__) . 'inc/wcir-class-rewards-table.php');
             require_once(plugin_dir_path(__FILE__) . 'inc/wcir-functions.php');
 
@@ -93,6 +96,9 @@ if (!class_exists('WCIRPlugin')) {
 
             // Add/edit reward page
             add_submenu_page("wc-cart-item-rewards", "Add Cart Item Reward", "Add", "manage_options", "wc-cart-item-rewards-editor", array($this->manager, 'display_rewards_editor_page'));
+
+            // Log list table page
+            add_submenu_page("wc-cart-item-rewards", "Cart Item Rewards Log", "Log", "manage_options", "wc-cart-item-rewards-log", array($this->manager, 'display_rewards_log_page'));
         }
 
         /**
@@ -132,6 +138,8 @@ if (!class_exists('WCIRPlugin')) {
 
             self::maybe_create_reward_table();
 
+            self::maybe_create_reward_log_table();
+
             self::schedule_reward_status_update_cron();
         }
 
@@ -143,7 +151,7 @@ if (!class_exists('WCIRPlugin')) {
          */
         public static function deactivate()
         {
-            self::delete_db(); // for development
+            self::delete_dbs(); // for development
 
             self::remove_reward_status_update_cron();
         }
@@ -181,16 +189,49 @@ if (!class_exists('WCIRPlugin')) {
         }
 
         /**
+         * Maybe create the rewards log table.
+         */
+        public static function maybe_create_reward_log_table()
+        {
+            global $wpdb;
+
+            $rewards_table_name = $wpdb->prefix . self::$rewards_table_name;
+            $logger_table_name = $wpdb->prefix . self::$rewards_logger_table_name;
+
+            $charset_collate = $wpdb->get_charset_collate();
+
+            $sql = "CREATE TABLE IF NOT EXISTS $logger_table_name (
+                        id                  INT(15)     NOT NULL AUTO_INCREMENT,
+                        reward_id           INT(15)     NOT NULL,
+                        product_id          INT(15)     NOT NULL,
+                        user_id             INT(12)     NOT NULL,
+                        order_number        INT(12)     NOT NULL,
+                        timestamp_redeemed  TIMESTAMP   NOT NULL,
+                        created_timestamp   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY  (id),
+                        FOREIGN KEY (reward_id) REFERENCES $rewards_table_name (id)
+                    ) $charset_collate;";
+
+            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+            dbDelta($sql);
+        }
+
+        /**
          * Deletes all resources and tables.
          */
-        public static function delete_db()
+        public static function delete_dbs()
         {
             global $wpdb;
             $table_name = $wpdb->prefix . self::$rewards_table_name;
 
-            // Check if the table exists
+            // Drop rewards table if it exists
             if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
-                // Drop the table
+                $wpdb->query("DROP TABLE $table_name");
+            }
+
+            // Drop logger if it exists
+            $table_name = $wpdb->prefix . self::$rewards_logger_table_name;
+            if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
                 $wpdb->query("DROP TABLE $table_name");
             }
         }
