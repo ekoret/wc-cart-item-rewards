@@ -1,6 +1,6 @@
 <?php
 
-$reward_log_url = admin_url('/admin.php?page=wc-cart-item-rewards-log');
+$reward_log_url = admin_url('/admin.php?page=wc-cart-item-rewards');
 $add_reward_url = admin_url('/admin.php?page=wc-cart-item-rewards-editor');
 $wcir_table_instance->prepare_items();
 
