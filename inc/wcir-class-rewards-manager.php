@@ -449,7 +449,11 @@ class WCIRRewardsManager
     public function add_line_item_to_order_details($item, $cart_item_key, $values, $order)
     {
         if (isset($values['wcir_reward'])) {
-            $item->update_meta_data('wcir_promo', 'data');
+            $inline_cart_item_name = $this->get_inline_cart_display($values['wcir_reward_id']);
+
+            if (!is_null($inline_cart_item_name)) {
+                $item->update_meta_data('wcir_promo', $inline_cart_item_name);
+            }
         }
     }
 
@@ -458,7 +462,7 @@ class WCIRRewardsManager
      * 
      * Hooked into 'woocommerce_order_item_display_meta_key'
      */
-    public  function change_line_item_order_details_key($display_value, $meta, $order)
+    public function change_line_item_order_details_key($display_value, $meta, $order)
     {
         if ($meta->key === 'wcir_promo') {
             $display_value = 'Promo';

@@ -67,10 +67,10 @@ if (!class_exists('WCIRPlugin')) {
             add_action('woocommerce_before_calculate_totals', array($this->manager, 'set_reward_prices'), 10, 1);
             add_action('woocommerce_before_calculate_totals', array($this->manager, 'maybe_add_reward_to_cart'), 10, 1);
 
-            // Hook to handle reward item quantity input on cart page
+            // Hook to remove reward item quantity input on cart page
             add_filter('woocommerce_cart_item_quantity', array($this->manager, 'disable_cart_item_qty'), 10, 3);
 
-            // Hook to handle reward item quantity input on mini-cart
+            // Hook to remove reward item quantity input on mini-cart
             add_filter('woocommerce_widget_cart_item_quantity', array($this->manager, 'disable_cart_item_qty'), 10, 3);
 
             // Hook to handle the price in the mini-cart for the reward
@@ -81,9 +81,6 @@ if (!class_exists('WCIRPlugin')) {
 
             // Hook to add item data to be displayed 
             add_filter('woocommerce_get_item_data', array($this->manager, 'add_item_data'), 10, 2);
-
-            // Hook to check order after placing and log
-            // add_action('woocommerce_new_order', array($this->manager, 'check_placed_order'), 10, 1);
 
             // Hook to add cart item data on order details
             add_action('woocommerce_checkout_create_order_line_item', array($this->manager, 'add_line_item_to_order_details'), 10, 4);
