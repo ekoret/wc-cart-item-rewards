@@ -3,19 +3,12 @@
 
 class WCIRRewardsManager
 {
-    private $WCIRPlugin;
-
-    public function __construct($WCIRPlugin)
-    {
-        $this->WCIRPlugin = $WCIRPlugin;
-    }
-
     /**
      * Display list of all the rewards.
      */
     public function display_rewards_page()
     {
-        $wcir_table_instance = new WCIRRewardsTable($this->WCIRPlugin::$rewards_table_name);
+        $wcir_table_instance = new WCIRRewardsTable(WCIRPlugin::$rewards_table_name);
 
         require_once(WCIR_VIEWS . "/reward-list.php");
     }
@@ -31,7 +24,7 @@ class WCIRRewardsManager
         if (isset($_GET) && isset($_GET['edit'])) {
             global $wpdb;
 
-            $reward_table = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+            $reward_table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
             $wcir_reward_id = intval($_GET['reward_id']);
 
@@ -176,7 +169,7 @@ class WCIRRewardsManager
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+        $table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
         $rewards = $wpdb->get_results("SELECT * FROM $table WHERE status = 1", ARRAY_A);
 
@@ -189,7 +182,7 @@ class WCIRRewardsManager
     public function add_new_reward($reward_data)
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
         $result = $wpdb->insert($table_name, $reward_data);
 
@@ -209,7 +202,7 @@ class WCIRRewardsManager
     public function update_reward($reward_data)
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
 
         $where = array('id' => $reward_data['id']);
@@ -231,7 +224,7 @@ class WCIRRewardsManager
     public function delete_reward($reward_id)
     {
         global $wpdb;
-        $table_name = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
         $result = $wpdb->delete($table_name, array('id' => $reward_id));
 
@@ -252,7 +245,7 @@ class WCIRRewardsManager
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+        $table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
         $current_date = current_time('mysql');
         $current_timestamp = strtotime($current_date);
 
@@ -363,7 +356,7 @@ class WCIRRewardsManager
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+        $table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
         $reward = $wpdb->get_var($wpdb->prepare("SELECT display_name FROM $table WHERE id = %d", array($reward_id)));
 
@@ -413,7 +406,7 @@ class WCIRRewardsManager
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . $this->WCIRPlugin::$rewards_table_name;
+        $table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
 
         $reward = $wpdb->get_var($wpdb->prepare("SELECT inline_cart_display FROM $table WHERE id = %d", array($reward_id)));
 

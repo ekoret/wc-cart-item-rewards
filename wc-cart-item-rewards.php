@@ -35,7 +35,7 @@ if (!class_exists('WCIRPlugin')) {
             require_once(plugin_dir_path(__FILE__) . 'inc/wcir-functions.php');
 
 
-            $this->manager = new WCIRRewardsManager($this);
+            $this->manager = new WCIRRewardsManager();
             $this->register();
         }
 
