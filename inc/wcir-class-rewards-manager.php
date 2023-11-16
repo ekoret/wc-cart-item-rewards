@@ -66,11 +66,19 @@ class WCIRRewardsManager
 
             // Check if reward is already in the cart
             if ($this->is_reward_in_cart($cart->get_cart(), $reward_id)) {
-                // Check if the order is still eligbile for the reward
-                if ($this->is_cart_over_minimum($minimum_order, $cart_total_after_discounts)) {
-                    continue;
-                } else {
-                    $this->remove_reward_from_cart($cart, $reward_id);
+                /**
+                 * First we check if the minimum order is null. If it is, that
+                 * means that the minimum order is not set in the rewards settings.
+                 * So in that case, we can completely skip over checking if it eligible
+                 * for the cart as it will always be eligible for the cart.
+                 */
+                if (!is_null($minimum_order)) {
+                    // Checking if the order is still eligbile for the reward
+                    if ($this->is_cart_over_minimum($minimum_order, $cart_total_after_discounts)) {
+                        continue;
+                    } else {
+                        $this->remove_reward_from_cart($cart, $reward_id);
+                    }
                 }
                 continue;
             }
@@ -156,7 +164,7 @@ class WCIRRewardsManager
      */
     public function is_cart_over_minimum($minimum_order, $cart_total)
     {
-        if ($cart_total >= $minimum_order) {
+        if (is_null($minimum_order) || $cart_total >= $minimum_order) {
             return true;
         }
 
