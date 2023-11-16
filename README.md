@@ -47,6 +47,8 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 ## To-Do List
 
+- Handle in the case customer places an order if reward is in cart but it is not eligible.
+  - When customer places order, check in cart if rewards are still available. If they are not, remove them from the cart and decide if customer should be redirected or not.
 - REFACTOR
 - Create logs
 
