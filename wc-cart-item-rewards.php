@@ -112,7 +112,8 @@ if (!class_exists('WCIRPlugin')) {
          */
         public function enqueue()
         {
-            if (is_admin() && isset($_GET['page']) && ($_GET['page'] === 'wc-cart-item-rewards' || $_GET['page'] === 'wc-cart-item-rewards-editor')) {
+            $whitelisted_pages = array('wc-cart-item-rewards', 'wc-cart-item-rewards-editor', 'wc-cart-item-rewards-log');
+            if (is_admin() && isset($_GET['page']) && in_array($_GET['page'], $whitelisted_pages)) {
                 // Plugin styles
                 wp_enqueue_style('wcir-styles', WCIR_STYLES, array(), false, 'all');
 
