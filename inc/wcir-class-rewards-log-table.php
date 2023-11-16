@@ -49,7 +49,7 @@ class WCIRRewardsLogTable extends WP_List_Table
         // Here we are ensuring that the orderby value is allowed
         $orderby_options = array(
             'product_id' => 'product_id',
-            'created_timestamp' => 'created_timestamp'
+            'created_timestamp' => 'created_timestamp',
         );
         $order_options = array(
             'asc' => 'ASC',
@@ -72,11 +72,6 @@ class WCIRRewardsLogTable extends WP_List_Table
         return array(
             'product_id' => array('product_id', false),
             'created_timestamp' => array('created_timestamp', false),
-            'reward_name' => array('reward_name', false),
-            'stock' => array('stock', false),
-            'status' => array('status', false),
-            'start_date' => array('start_date', false),
-            'end_date' => array('end_date', false),
         );
     }
 
