@@ -111,8 +111,9 @@ class WCIRRewardsTable extends WP_List_Table
             case 'stock':
             case 'start_date':
             case 'end_date':
-            case 'change_timestamp':
                 return $item[$column_name];
+            case 'change_timestamp':
+                return date('Y-m-d h:i:s A', strtotime($item[$column_name]));
 
             case 'reward_name':
                 return "<a href='" . admin_url("/admin.php?page=wc-cart-item-rewards-editor&edit&reward_id=" . $item['id'] . "") . "'>" . $item[$column_name] . "</a>";
