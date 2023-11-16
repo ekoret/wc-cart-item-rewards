@@ -71,13 +71,13 @@ class WCIRRewardsManager
             $stock = $reward['stock'];
             $stock_status = $product->get_stock_status();
 
-            // Check if there is any stock or redemptions available
-            if (!$this->check_stock($current_redemptions, $stock, $stock_status)) {
+            // Check if the cart total is eligible 
+            if (!$this->is_cart_over_minimum($minimum_order, $cart_total_after_discounts)) {
                 continue;
             }
 
-            // Check if the cart total is eligible 
-            if (!$this->is_cart_over_minimum($minimum_order, $cart_total_after_discounts)) {
+            // Check if there is any stock or redemptions available
+            if (!$this->check_stock($current_redemptions, $stock, $stock_status)) {
                 continue;
             }
 
@@ -112,6 +112,10 @@ class WCIRRewardsManager
         // if the product is out of stock, false
         if ($stock_status === 'outofstock') {
             return false;
+        }
+
+        if (is_null($stock)) {
+            return true;
         }
 
         // if stock redemption has supassed, false
