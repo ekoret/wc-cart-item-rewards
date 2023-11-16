@@ -206,7 +206,7 @@ if (!class_exists('WCIRPlugin')) {
                         product_id          INT(15)     NOT NULL,
                         user_id             INT(12)     NOT NULL,
                         order_number        INT(12)     NOT NULL,
-                        timestamp_redeemed  TIMESTAMP   NOT NULL,
+                        redeemed_timestamp  TIMESTAMP   NOT NULL,
                         created_timestamp   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
                         PRIMARY KEY  (id),
                         FOREIGN KEY (reward_id) REFERENCES $rewards_table_name (id)
@@ -224,13 +224,13 @@ if (!class_exists('WCIRPlugin')) {
             global $wpdb;
             $table_name = $wpdb->prefix . self::$rewards_table_name;
 
-            // Drop rewards table if it exists
+            // Drop logger if it exists
+            $table_name = $wpdb->prefix . self::$rewards_logger_table_name;
             if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
                 $wpdb->query("DROP TABLE $table_name");
             }
 
-            // Drop logger if it exists
-            $table_name = $wpdb->prefix . self::$rewards_logger_table_name;
+            // Drop rewards table if it exists
             if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
                 $wpdb->query("DROP TABLE $table_name");
             }
