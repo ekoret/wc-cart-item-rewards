@@ -49,6 +49,7 @@ class WCIRRewardsLogTable extends WP_List_Table
         // Here we are ensuring that the orderby value is allowed
         $orderby_options = array(
             'product_id' => 'product_id',
+            'redeemed_timestamp' => 'redeemed_timestamp',
             'created_timestamp' => 'created_timestamp',
         );
         $order_options = array(
@@ -72,6 +73,7 @@ class WCIRRewardsLogTable extends WP_List_Table
         return array(
             'product_id' => array('product_id', false),
             'created_timestamp' => array('created_timestamp', false),
+            'redeemed_timestamp' => array('redeemed_timestamp', false),
         );
     }
 
@@ -85,7 +87,7 @@ class WCIRRewardsLogTable extends WP_List_Table
             'product_id' => '<span title="Product used for the reward.">Reward Item</span>',
             'user_id' => '<span title="The user that redeemed the reward.">User</span>',
             'order_number' => '<span title="Order number that redeemed the reward.">Order Number</span>',
-            'timestamp_redeemed' => '<span title="When the reward was redeemed.">Redeemed Date</span>',
+            'redeemed_timestamp' => '<span title="When the reward was redeemed.">Redeemed Date</span>',
             'created_timestamp' => '<span title="When the log was created.">Date Logged</span>',
         );
 
@@ -100,7 +102,7 @@ class WCIRRewardsLogTable extends WP_List_Table
         switch ($column_name) {
             case 'user_id':
             case 'order_number':
-            case 'timestamp_redeemed':
+            case 'redeemed_timestamp':
             case 'created_timestamp':
                 return $item[$column_name];
 
