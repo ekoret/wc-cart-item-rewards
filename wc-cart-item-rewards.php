@@ -82,6 +82,15 @@ if (!class_exists('WCIRPlugin')) {
             // Hook to add item data to be displayed 
             add_filter('woocommerce_get_item_data', array($this->manager, 'add_item_data'), 10, 2);
 
+            // Hook to check order after placing and log
+            // add_action('woocommerce_new_order', array($this->manager, 'check_placed_order'), 10, 1);
+
+            // Hook to add cart item data on order details
+            add_action('woocommerce_checkout_create_order_line_item', array($this->manager, 'add_line_item_to_order_details'), 10, 4);
+
+            // Hook to change the cart item display key on order details
+            add_action('woocommerce_order_item_display_meta_key', array($this->manager, 'change_line_item_order_details_key'), 10, 3);
+
             add_action('init', array($this->manager, 'process_editor_form'));
         }
 

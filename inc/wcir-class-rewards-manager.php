@@ -440,4 +440,30 @@ class WCIRRewardsManager
 
         return $cart_item_data;
     }
+
+    /**
+     * Adds the inline cart item to order details.
+     * 
+     * Hooked into 'woocommerce_checkout_create_order_line_item'
+     */
+    public function add_line_item_to_order_details($item, $cart_item_key, $values, $order)
+    {
+        if (isset($values['wcir_reward'])) {
+            $item->update_meta_data('wcir_promo', 'data');
+        }
+    }
+
+    /**
+     * Changes the inline cart item key name on order details.
+     * 
+     * Hooked into 'woocommerce_order_item_display_meta_key'
+     */
+    public  function change_line_item_order_details_key($display_value, $meta, $order)
+    {
+        if ($meta->key === 'wcir_promo') {
+            $display_value = 'Promo';
+        }
+
+        return $display_value;
+    }
 }
