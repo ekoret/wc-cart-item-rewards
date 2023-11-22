@@ -88,6 +88,30 @@ if (!class_exists('WCIRPlugin')) {
             // Hook to change the cart item display key on order details
             add_action('woocommerce_order_item_display_meta_key', array($this->manager, 'change_line_item_order_details_key'), 10, 3);
 
+            // Hook to create a log and manage reward redemption
+            add_action('woocommerce_new_order', function ($order_id, WC_Order $order) {
+
+                foreach ($order->get_items() as $item) {
+                    $wcir_reward = $item->get_meta('wcir_reward');
+                    $wcir_reward_id = $item->get_meta('wcir_reward_id');
+
+                    if (empty($wcir_reward)) continue;
+
+                    $product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+
+                    $args = array(
+                        'reward_id' => $wcir_reward_id,
+                        'product_id' => $product_id,
+                        'user_id' => $order->get_user_id(),
+                        'order_number' => $order_id,
+                        'redeemed_timestamp' => current_datetime()->getTimestamp()
+                    );
+
+                    WCIRRewardsLogger::add_log($args);
+                    $this->manager->increment_reward_redemption($wcir_reward_id);
+                }
+            }, 10, 2);
+
             add_action('init', array($this->manager, 'process_editor_form'));
         }
 
@@ -229,17 +253,17 @@ if (!class_exists('WCIRPlugin')) {
         public static function delete_dbs()
         {
             global $wpdb;
-            $table_name = $wpdb->prefix . self::$rewards_table_name;
+            $rewards_table_name = $wpdb->prefix . self::$rewards_table_name;
+            $rewards_log_table_name = $wpdb->prefix . self::$rewards_logger_table_name;
 
             // Drop logger if it exists
-            $table_name = $wpdb->prefix . self::$rewards_logger_table_name;
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
-                $wpdb->query("DROP TABLE $table_name");
+            if ($wpdb->get_var("SHOW TABLES LIKE '$rewards_log_table_name'") === $rewards_log_table_name) {
+                $wpdb->query("DROP TABLE $rewards_log_table_name");
             }
 
             // Drop rewards table if it exists
-            if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
-                $wpdb->query("DROP TABLE $table_name");
+            if ($wpdb->get_var("SHOW TABLES LIKE '$rewards_table_name'") === $rewards_table_name) {
+                $wpdb->query("DROP TABLE $rewards_table_name");
             }
         }
 

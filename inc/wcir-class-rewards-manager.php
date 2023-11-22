@@ -385,6 +385,17 @@ class WCIRRewardsManager
         return $reward;
     }
 
+    public static function get_reward_name($reward_id)
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
+
+        $reward = $wpdb->get_var($wpdb->prepare("SELECT reward_name FROM $table WHERE id = %d", array($reward_id)));
+
+        return $reward;
+    }
+
     /**
      * Change the cart item name to the reward display name
      */
@@ -453,6 +464,9 @@ class WCIRRewardsManager
      * Adds the inline cart item to order details.
      * 
      * Hooked into 'woocommerce_checkout_create_order_line_item'
+     * 
+     * Here we are in the context of turning a cart item into an order item. Use
+     * this to transfer custom data from the cart to the order.
      */
     public function add_line_item_to_order_details($item, $cart_item_key, $values, $order)
     {
@@ -462,6 +476,9 @@ class WCIRRewardsManager
             if (!is_null($inline_cart_item_name)) {
                 $item->update_meta_data('wcir_promo', $inline_cart_item_name);
             }
+
+            $item->update_meta_data('wcir_reward', 1);
+            $item->update_meta_data('wcir_reward_id', $values['wcir_reward_id']);
         }
     }
 
@@ -477,5 +494,29 @@ class WCIRRewardsManager
         }
 
         return $display_value;
+    }
+
+    public function increment_reward_redemption($reward_id)
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . WCIRPlugin::$rewards_table_name;
+
+        $current_redemptions = $wpdb->get_var($wpdb->prepare("SELECT current_redemptions FROM $table_name WHERE id = %d", $reward_id));
+
+        if ($current_redemptions !== null) {
+            $new_redemptions = $current_redemptions + 1;
+
+            $data = array('current_redemptions' => $new_redemptions);
+            $where = array('id' => $reward_id);
+
+
+            $result = $wpdb->update($table_name, $data, $where);
+            if ($result === false) {
+                $error_message = $wpdb->last_error;
+                error_log('WCIR Increment Reward Database Error: ' . $error_message);
+            }
+        } else {
+            error_log('WCIR Increment Reward Database Error: Unable to retrieve current redemptions for reward ID ' . $reward_id);
+        }
     }
 }

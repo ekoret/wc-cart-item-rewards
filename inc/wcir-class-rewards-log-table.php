@@ -100,24 +100,29 @@ class WCIRRewardsLogTable extends WP_List_Table
     protected function column_default($item, $column_name)
     {
         switch ($column_name) {
-            case 'user_id':
-            case 'order_number':
-            case 'redeemed_timestamp':
-            case 'created_timestamp':
+            case 'redeemed_timestamp': // Redeemed Date
                 return $item[$column_name];
+            case 'created_timestamp': // Date logged
+                return date('Y-m-d h:i:s A', strtotime($item[$column_name]));
 
-            case 'reward_id':
-                return "<a href='" . admin_url("/admin.php?page=wc-cart-item-rewards-editor&edit&reward_id=" . $item['reward_id'] . "") . "'>" . $item[$column_name] . "</a>";
+            case 'reward_id': // Reward name
+                $reward_name = WCIRRewardsManager::get_reward_name($item[$column_name]);
+                return "<a href='" . admin_url("/admin.php?page=wc-cart-item-rewards-editor&edit&reward_id=" . $item[$column_name] . "") . "'>" . $reward_name . "</a>";
 
-
-            case 'product_id': // Reward Item
-
-                $product_id = $item[$column_name];
-                $product = wc_get_product($product_id);
+            case 'product_id':  // Reward Item
+                $product = wc_get_product($item[$column_name]);
                 $name = $product->get_name();
                 $permalink = $product->get_permalink();
 
-                return "<a href='$permalink'>$name</a>";
+                return "<a href='" . $permalink . "'>" . $name . "</a>";
+
+            case 'user_id': // User name
+                $user = get_user_by('id', $item[$column_name]);
+                $user_name = $user->display_name;
+                return  $user_name;
+
+            case 'order_number':
+                return "<a href='" . admin_url("/post.php?post=" . $item[$column_name] . "&action=edit") . "'>" . $item[$column_name] . "</a>";
 
             default:
                 return "No Value";

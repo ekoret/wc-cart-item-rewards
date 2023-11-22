@@ -8,6 +8,11 @@ class WCIRRewardsLogger
 
         $table = $wpdb->prefix . WCIRPlugin::$rewards_logger_table_name;
 
-        $result = $wpdb->insert($wpdb->prepare(""));
+        $result = $wpdb->insert($table, $data);
+
+        if ($result === false) {
+            $error_message = $wpdb->last_error;
+            error_log('WCIR Add Reward Log Database Error: ' . $error_message);
+        }
     }
 }
