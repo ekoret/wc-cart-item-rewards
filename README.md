@@ -47,12 +47,13 @@ Automatically update reward statuses based on start and end dates, ensuring accu
 
 ## To-Do List
 
+- Add option to make reward have permalink or not
+- Issue with redeemed timestamp in table
 - Database issue where saving the add new reward form will throw an error if nothing is changed.
 - Update redeemed timestamp when order gets completed, not when the order is placed.
 - Handle in the case customer places an order if reward is in cart but it is not eligible.
   - When customer places order, check in cart if rewards are still available. If they are not, remove them from the cart and decide if customer should be redirected or not.
 - REFACTOR
-- Create logs
 
   ### Handling Reward Stock
 
