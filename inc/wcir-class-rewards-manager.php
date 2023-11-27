@@ -477,8 +477,8 @@ class WCIRRewardsManager
                 $item->update_meta_data('wcir_promo', $inline_cart_item_name);
             }
 
-            $item->update_meta_data('wcir_reward', 1);
-            $item->update_meta_data('wcir_reward_id', $values['wcir_reward_id']);
+            $item->update_meta_data('_wcir_reward', 1);
+            $item->update_meta_data('_wcir_reward_id', $values['wcir_reward_id']);
         }
     }
 
@@ -518,5 +518,36 @@ class WCIRRewardsManager
         } else {
             error_log('WCIR Increment Reward Database Error: Unable to retrieve current redemptions for reward ID ' . $reward_id);
         }
+    }
+
+    public function handle_reward_on_new_order($order_id, $order)
+    {
+
+        foreach ($order->get_items() as $item) {
+            $wcir_reward = $item->get_meta('wcir_reward');
+            $wcir_reward_id = $item->get_meta('wcir_reward_id');
+
+            if (empty($wcir_reward)) continue;
+
+            $product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+            error_log(print_r(current_datetime()->getTimestamp(), true));
+            $args = array(
+                'reward_id' => $wcir_reward_id,
+                'product_id' => $product_id,
+                'user_id' => $order->get_user_id(),
+                'order_number' => $order_id,
+                'redeemed_timestamp' => current_datetime()->getTimestamp()
+            );
+
+            WCIRRewardsLogger::add_log($args);
+            $this->increment_reward_redemption($wcir_reward_id);
+        }
+    }
+
+    public function hide_meta_on_order_edit($hidden_meta_keys)
+    {
+        $hidden_meta_keys[] = '_wcir_reward';
+        $hidden_meta_keys[] = '_wcir_reward_id';
+        return $hidden_meta_keys;
     }
 }

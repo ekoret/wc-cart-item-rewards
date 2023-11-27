@@ -89,28 +89,10 @@ if (!class_exists('WCIRPlugin')) {
             add_action('woocommerce_order_item_display_meta_key', array($this->manager, 'change_line_item_order_details_key'), 10, 3);
 
             // Hook to create a log and manage reward redemption
-            add_action('woocommerce_new_order', function ($order_id, WC_Order $order) {
+            add_action('woocommerce_new_order', array($this->manager, 'handle_reward_on_new_order'), 10, 2);
 
-                foreach ($order->get_items() as $item) {
-                    $wcir_reward = $item->get_meta('wcir_reward');
-                    $wcir_reward_id = $item->get_meta('wcir_reward_id');
-
-                    if (empty($wcir_reward)) continue;
-
-                    $product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
-
-                    $args = array(
-                        'reward_id' => $wcir_reward_id,
-                        'product_id' => $product_id,
-                        'user_id' => $order->get_user_id(),
-                        'order_number' => $order_id,
-                        'redeemed_timestamp' => current_datetime()->getTimestamp()
-                    );
-
-                    WCIRRewardsLogger::add_log($args);
-                    $this->manager->increment_reward_redemption($wcir_reward_id);
-                }
-            }, 10, 2);
+            // Hook to hide meta on admin order edit screen
+            add_filter('woocommerce_hidden_order_itemmeta', array($this->manager, 'hide_meta_on_order_edit'), 10, 1);
 
             add_action('init', array($this->manager, 'process_editor_form'));
         }
