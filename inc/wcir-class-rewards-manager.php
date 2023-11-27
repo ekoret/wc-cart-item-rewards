@@ -530,7 +530,7 @@ class WCIRRewardsManager
             if (empty($wcir_reward)) continue;
 
             $product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
-            error_log(print_r(current_datetime()->getTimestamp(), true));
+
             $args = array(
                 'reward_id' => $wcir_reward_id,
                 'product_id' => $product_id,
