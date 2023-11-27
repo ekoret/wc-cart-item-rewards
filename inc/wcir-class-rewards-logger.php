@@ -2,6 +2,9 @@
 
 class WCIRRewardsLogger
 {
+    /**
+     * Adds a log into the logger table.
+     */
     public static function add_log($data)
     {
         global $wpdb;

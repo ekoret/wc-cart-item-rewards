@@ -13,7 +13,9 @@ class WCIRRewardsLogTable extends WP_List_Table
         $this->table_name = $table_name;
     }
 
-
+    /**
+     * Prepare the items to be displayed in the table.
+     */
     public function prepare_items()
     {
         /**

@@ -49,6 +49,11 @@ class WCIRRewardsManager
         require_once(WCIR_VIEWS . "/reward-editor.php");
     }
 
+    /**
+     * Handles adding the reward to the cart.
+     * 
+     * Hooked into 'woocommerce_before_calculate_totals'
+     */
     public function maybe_add_reward_to_cart($cart)
     {
         $rewards = $this->get_all_active_rewards();
@@ -262,6 +267,8 @@ class WCIRRewardsManager
 
     /**
      * The cron method to run to update statues depending on start and end dates.
+     * 
+     * Hooked into 'WCIRPlugin::$cron_event_name'
      */
     public function update_status_based_on_dates()
     {
@@ -296,6 +303,8 @@ class WCIRRewardsManager
 
     /**
      * Handle the add/edit/delete form to add/edit/delete reward.
+     * 
+     * Hooked into 'init'
      */
     public function process_editor_form()
     {
@@ -361,7 +370,9 @@ class WCIRRewardsManager
     }
 
     /**
-     * Disbles the quantity fields on cart and checkout
+     * Disbles the quantity fields in the mini-cart and cart.
+     * 
+     * Hooked into 'woocommerce_cart_item_quantity', 'woocommerce_widget_cart_item_quantity'
      */
     public function disable_cart_item_qty($quantity_html, $cart_item_key, $cart_item)
     {
@@ -385,6 +396,9 @@ class WCIRRewardsManager
         return $reward;
     }
 
+    /**
+     * Returns the reward name for the reward.
+     */
     public static function get_reward_name($reward_id)
     {
         global $wpdb;
@@ -435,6 +449,9 @@ class WCIRRewardsManager
         return $item_data;
     }
 
+    /**
+     * Returns the inline cart display name for the reward.
+     */
     private function get_inline_cart_display($reward_id)
     {
         global $wpdb;
@@ -496,6 +513,9 @@ class WCIRRewardsManager
         return $display_value;
     }
 
+    /**
+     * Adds 1 to the current redemptions for the reward.
+     */
     public function increment_reward_redemption($reward_id)
     {
         global $wpdb;
@@ -520,6 +540,12 @@ class WCIRRewardsManager
         }
     }
 
+    /**
+     * Handles incrementing every reward in the order. Also creates a log for each
+     * reward in the order.
+     * 
+     * Hooked into 'woocommerce_new_order'
+     */
     public function handle_reward_on_new_order($order_id, $order)
     {
 
@@ -544,6 +570,11 @@ class WCIRRewardsManager
         }
     }
 
+    /**
+     * Hide redundant order meta on admin order edit.
+     * 
+     * Hooked into 'woocommerce_hidden_order_itemmeta'
+     */
     public function hide_meta_on_order_edit($hidden_meta_keys)
     {
         $hidden_meta_keys[] = '_wcir_reward';
